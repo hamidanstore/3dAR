@@ -1,0 +1,16 @@
+{
+  "nama": "astronot",
+  "link": "#",
+  "files": [
+    {
+      "type": "glb",
+      "src": "Astronaut.glb",
+      "thumb": "icon.png"
+    },
+    {
+      "type": "jpg",
+      "src": "icon.png",
+      "thumb": "icon.png"
+    }
+  ]
+}
