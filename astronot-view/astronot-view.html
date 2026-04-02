@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>3D Product Viewer</title>
+    <script type="module" src="https://ajax.googleapis.com/ajax/libs/model-viewer/3.3.0/model-viewer.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script type="module" src="https://unpkg.com/ionicons@7.1.0/dist/ionicons/ionicons.esm.js"></script>
+    <script nomodule src="https://unpkg.com/ionicons@7.1.0/dist/ionicons/ionicons.js"></script>
+    <style>
+        :root { --biru: #1877f2; --hijau: #25d366; --hitam: #2b2b36; --putih: #ffffff; --bg-body: #f0f2f5; }
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', sans-serif; }
+        body { background-color: var(--bg-body); display: flex; justify-content: center; align-items: center; min-height: 100vh; padding: 20px 10px; }
+        .product-card { background: var(--putih); width: 100%; max-width: 480px; border-radius: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.1); position: relative; display: flex; flex-direction: column; }
+        .viewer-container { width: 100%; height: 400px; background: var(--hitam); position: relative; display: flex; justify-content: center; align-items: center; overflow: hidden; border-radius: 20px 20px 0 0; }
+        .viewer-container model-viewer, .viewer-container img, .viewer-container video { width: 100%; height: 100%; object-fit: contain; animation: mediaFadeIn 0.6s cubic-bezier(0.25, 1, 0.5, 1) forwards; }
+        @keyframes mediaFadeIn { 0% { opacity: 0; transform: scale(0.95); } 100% { opacity: 1; transform: scale(1); } }
+        .content-wrapper { padding: 25px; }
+        .product-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px; position: relative; z-index: 10; }
+        .product-name { font-size: 1.4rem; color: var(--hitam); font-weight: 700; flex: 1; padding-right: 15px; line-height: 1.3; }
+        .share-wrapper { position: relative; width: 50px; height: 50px; }
+        .menu { position: absolute; width: 220px; height: 220px; top: 50%; left: 50%; transform: translate(-50%, -50%); display: flex; align-items: center; justify-content: center; pointer-events: none; }
+        .menu.active { pointer-events: auto; }
+        .menu .toggle { position: relative; height: 50px; width: 50px; background: var(--putih); border-radius: 50%; display: flex; align-items: center; justify-content: center; color: var(--hitam); font-size: 1.4rem; cursor: pointer; transition: transform 1.25s cubic-bezier(0.25, 1, 0.5, 1), box-shadow 0.4s ease; box-shadow: 0 4px 12px rgba(0,0,0,0.1); pointer-events: auto; z-index: 5; }
+        .menu.active .toggle { transform: rotate(360deg); box-shadow: 0 6px 8px rgba(0,0,0,0.15), 0 0 0 2px var(--hitam), 0 0 0 6px var(--putih); }
+        .menu li { position: absolute; list-style: none; transition: 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275); z-index: 4; }
+        .menu.active li { transform: rotate(calc(45deg * var(--i))) translateY(-80px); }
+        .menu li a { display: flex; justify-content: center; align-items: center; width: 42px; height: 42px; border-radius: 50%; font-size: 1.2rem; color: var(--clr); background: var(--putih); text-decoration: none; transition: 0.3s ease; box-shadow: 0 3px 8px rgba(0,0,0,0.15); transform: rotate(calc(-45deg * var(--i))) scale(0); opacity: 0; }
+        .menu.active li a { transform: rotate(calc(-45deg * var(--i))) scale(1); opacity: 1; }
+        .menu li a:hover { color: var(--putih); background: var(--clr); box-shadow: 0 0 15px var(--clr); }
+        .thumbnails-container { display: flex; gap: 12px; margin-bottom: 25px; overflow-x: auto; padding-bottom: 5px; scroll-behavior: smooth; }
+        .thumbnails-container::-webkit-scrollbar { height: 4px; }
+        .thumbnails-container::-webkit-scrollbar-thumb { background: #d1d1d1; border-radius: 10px; }
+        .thumb-box { min-width: 65px; height: 65px; border-radius: 10px; cursor: pointer; border: 2px solid transparent; overflow: hidden; position: relative; transition: all 0.3s ease; }
+        .thumb-box img { width: 100%; height: 100%; object-fit: cover; }
+        .thumb-box::after { content: ''; position: absolute; inset: 0; background: rgba(0,0,0,0.3); transition: 0.3s; }
+        .thumb-box.active::after, .thumb-box:hover::after { background: transparent; }
+        .thumb-box.active { border-color: var(--biru); transform: translateY(-4px); box-shadow: 0 4px 12px rgba(24, 119, 242, 0.3); }
+        .btn-lihat { display: block; width: 100%; padding: 16px; text-align: center; background: var(--biru); color: var(--putih); text-decoration: none; font-size: 1.1rem; font-weight: 700; border-radius: 12px; transition: all 0.3s ease; box-shadow: 0 4px 15px rgba(24, 119, 242, 0.3); }
+        .btn-lihat:hover { background: var(--hijau); transform: translateY(-2px); box-shadow: 0 6px 20px rgba(37, 211, 102, 0.4); }
+        .ar-button { position: absolute; bottom: 20px; left: 50%; transform: translateX(-50%); background: rgba(255, 255, 255, 0.85); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); color: var(--hitam); border: 1px solid rgba(255, 255, 255, 0.5); padding: 10px 24px; border-radius: 30px; font-size: 0.95rem; font-weight: 700; cursor: pointer; box-shadow: 0 4px 15px rgba(0,0,0,0.15); display: flex; align-items: center; gap: 8px; transition: all 0.4s; z-index: 100; }
+        .ar-button:hover { background: var(--putih); transform: translateX(-50%) translateY(-4px); box-shadow: 0 8px 25px rgba(0,0,0,0.25); color: var(--biru); }
+        .ar-icon { width: 20px; height: 20px; fill: currentColor; }
+    </style>
+</head>
+<body>
+    <div class="product-card">
+        <div class="viewer-container" id="main-viewer"></div>
+        <div class="content-wrapper">
+            <div class="product-header">
+                <h1 class="product-name" id="prod-name">Memuat Data...</h1>
+                <div class="share-wrapper">
+                    <div class="menu" id="share-menu">
+                        <div class="toggle" id="share-toggle"><ion-icon name="share-social"></ion-icon></div>
+                        <li style="--i:0; --clr:#6c757d;"><a href="#" onclick="copyShareLink(event)"><i class="fa-solid fa-link"></i></a></li>
+                        <li style="--i:7; --clr:#1877f2;"><a href="#" onclick="shareTo('facebook', event)"><i class="fa-brands fa-facebook-f"></i></a></li>
+                        <li style="--i:6; --clr:#25d366;"><a href="#" onclick="shareTo('whatsapp', event)"><i class="fa-brands fa-whatsapp"></i></a></li>
+                        <li style="--i:5; --clr:#ea4335;"><a href="https://www.youtube.com" target="_blank"><i class="fa-brands fa-youtube"></i></a></li>
+                    </div>
+                </div>
+            </div>
+            <div class="thumbnails-container" id="thumbnails"></div>
+            <a href="#" class="btn-lihat" id="prod-link" target="_blank">Lihat Produk</a>
+        </div>
+    </div>
+    <script>
+        const toggle = document.getElementById('share-toggle'); const menu = document.getElementById('share-menu');
+        toggle.onclick = () => menu.classList.toggle('active');
+        function shareTo(platform, e) { e.preventDefault(); const url = encodeURIComponent(window.location.href); const title = encodeURIComponent(document.title); let shareUrl = ''; if (platform === 'facebook') { shareUrl = `https://www.facebook.com/sharer/sharer.php?u=${url}`; } else if (platform === 'whatsapp') { shareUrl = `https://api.whatsapp.com/send?text=${title} - ${url}`; } if (shareUrl) window.open(shareUrl, '_blank', 'width=600,height=400'); }
+        function copyShareLink(e) { e.preventDefault(); const url = window.location.href; const icon = e.currentTarget.querySelector('i'); const fallbackCopy = (text) => { const textArea = document.createElement("textarea"); textArea.value = text; textArea.style.position = "fixed"; document.body.appendChild(textArea); textArea.focus(); textArea.select(); try { document.execCommand('copy'); showSuccess(); } catch (err) { alert("Gagal menyalin tautan."); } document.body.removeChild(textArea); }; const showSuccess = () => { icon.className = 'fa-solid fa-check'; setTimeout(() => { icon.className = 'fa-solid fa-link'; }, 2000); }; if (navigator.clipboard && window.isSecureContext) { navigator.clipboard.writeText(url).then(showSuccess).catch(() => fallbackCopy(url)); } else { fallbackCopy(url); } }
+        async function loadProductData() { try { const response = await fetch('3d-view.txt'); const data = await response.json(); renderUI(data); } catch (error) { document.getElementById('prod-name').innerText = "Gagal Memuat Data"; } }
+        function renderUI(data) { document.getElementById('prod-name').innerText = data.nama; document.getElementById('prod-link').href = data.link; document.title = data.nama + " | 3D Viewer"; const thumbContainer = document.getElementById('thumbnails'); thumbContainer.innerHTML = ''; data.files.forEach((file, index) => { const thumb = document.createElement('div'); thumb.className = `thumb-box ${index === 0 ? 'active' : ''}`; thumb.innerHTML = `<img src="${file.thumb}" alt="Thumbnail">`; thumb.onclick = () => { document.querySelectorAll('.thumb-box').forEach(el => el.classList.remove('active')); thumb.classList.add('active'); changeMainViewer(file); }; thumbContainer.appendChild(thumb); }); if (data.files.length > 0) changeMainViewer(data.files[0]); }
+        function changeMainViewer(file) { const viewer = document.getElementById('main-viewer'); viewer.innerHTML = ''; setTimeout(() => { if (file.type === 'glb' || file.type === 'gltf' || file.type === 'glf') { viewer.innerHTML = `<model-viewer src="${file.src}" ar ar-modes="webxr scene-viewer quick-look" auto-rotate camera-controls shadow-intensity="1"><button slot="ar-button" class="ar-button"><svg class="ar-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M7 3C4.79086 3 3 4.79086 3 7V10H5V7C5 5.89543 5.89543 5 7 5H10V3H7ZM17 3C19.2091 3 21 4.79086 21 7V10H19V7C19 5.89543 18.1046 5 17 5H14V3H17ZM21 14V17C21 19.2091 19.2091 21 17 21H14V19H17C18.1046 19 19 18.1046 19 17V14H21ZM3 14V17C3 19.2091 4.79086 21 7 21H10V19H7C5.89543 19 5 18.1046 5 17V14H3ZM12 7.5L8.5 9.5V14.5L12 16.5L15.5 14.5V9.5L12 7.5ZM10.5 10.6547L12 9.79904L13.5 10.6547V12.366L12 13.2217L10.5 12.366V10.6547Z"/></svg>Tampilkan AR</button></model-viewer>`; } else if (file.type === 'jpg' || file.type === 'png') { viewer.innerHTML = `<img src="${file.src}" alt="Gambar Produk">`; } else if (file.type === 'mp4' || file.type === 'mkv') { viewer.innerHTML = `<video controls autoplay muted loop><source src="${file.src}" type="video/mp4"></video>`; } }, 30); }
+        window.addEventListener('DOMContentLoaded', loadProductData);
+    </script>
+</body>
+</html>
