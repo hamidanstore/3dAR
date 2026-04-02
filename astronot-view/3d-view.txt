@@ -1,0 +1,11 @@
+{
+  "nama": "Astronot",
+  "link": "#",
+  "files": [
+    {
+      "type": "jpg",
+      "src": "1000236645.png",
+      "thumb": "1000236645.png"
+    }
+  ]
+}
