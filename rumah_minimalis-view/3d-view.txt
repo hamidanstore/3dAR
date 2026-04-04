@@ -1,0 +1,11 @@
+{
+  "nama": "Rumah minimalis",
+  "link": "#",
+  "files": [
+    {
+      "type": "glb",
+      "src": "desain_rumah_modern__type_6.glb",
+      "thumb": "https://images.unsplash.com/photo-1583337130417-3346a1be7dee?w=150"
+    }
+  ]
+}
