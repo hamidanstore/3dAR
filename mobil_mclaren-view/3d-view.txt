@@ -1,0 +1,11 @@
+{
+  "nama": "Mobil Mclaren",
+  "link": "#",
+  "files": [
+    {
+      "type": "jpg",
+      "src": "icon.png",
+      "thumb": "icon.png"
+    }
+  ]
+}
